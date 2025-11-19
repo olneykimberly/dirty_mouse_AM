@@ -1,0 +1,457 @@
+{
+    "Commment_Input_Output_Directories": "This section specifies the input and output directories for scripts",
+    "rawReads" : "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA",
+    "rawQC" : "../rawQC/",
+    "trimmedReads" : "../trimmedReads/",
+    "trimmedQC" : "../trimmedQC/",
+    "starAligned" : "../starAligned/",
+    "bamstats" : "../bamstats/",
+
+    "Comment_Reference" : "This section specifies the location of the mouse, Ensembl reference genome",
+    "Mmusculus.fa" : "/tgen_labs/jfryer/projects/references/mouse/refdata-gex-GRCm39-2024-A/fasta/genome",
+    "Mmusculus.gtf" : "/tgen_labs/jfryer/projects/references/mouse/refdata-gex-GRCm39-2024-A/genes/genes",
+    "star_ref_index" : "/tgen_labs/jfryer/projects/references/mouse/refdata-gex-GRCm39-2024-A_STARv2.7.11_150sjdb",
+
+    "Comment_Sample_Info": "The following section lists the samples that are to be analyzed",
+    "sample_names": ['CF6AM1', 'CF6AM2', 'CF6AM3', 'CF6AM6', 'CF6AM7', 'CF6WT1', 'CF6WT2', 'CF6WT3', 'CF6WT6', 'CF6WT7', 'CM6AM1', 'CM6AM2', 'CM6AM3', 'CM6AM6', 'CM6AM7', 'CM6WT1', 'CM6WT2', 'CM6WT3', 'CM6WT6', 'CM6WT7', 'DF6AM1', 'DF6AM2', 'DF6AM3', 'DF6AM6', 'DF6AM7', 'DF6WT1', 'DF6WT2', 'DF6WT3', 'DF6WT6', 'DF6WT7', 'DM6AM1', 'DM6AM2', 'DM6AM3', 'DM6AM6', 'DM6AM7', 'DM6WT1', 'DM6WT2', 'DM6WT3', 'DM6WT6', 'DM6WT7'],
+
+    "CF6AM1":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6AM1_1_BR_Whole_C1_WGMRS_A44774_235MMJLT4_AATGGTACCT_L002_R1_001",
+        "fq2": "AM_CF6AM1_1_BR_Whole_C1_WGMRS_A44774_235MMJLT4_AATGGTACCT_L002_R2_001",
+        "ID": "CF6AM1",
+        "SM": "CF6AM1",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6AM1",
+        "PL": "Illumina"
+        },
+
+    "CF6AM2":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6AM2_1_BR_Whole_C1_WGMRS_A44782_235MMJLT4_TGAAGCATCT_L002_R1_001",
+        "fq2": "AM_CF6AM2_1_BR_Whole_C1_WGMRS_A44782_235MMJLT4_TGAAGCATCT_L002_R2_001",
+        "ID": "CF6AM2",
+        "SM": "CF6AM2",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6AM2",
+        "PL": "Illumina"
+        },
+
+    "CF6AM3":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6AM3_1_BR_Whole_C1_WGMRS_A44790_235MMJLT4_TGTTCCACTT_L002_R1_001",
+        "fq2": "AM_CF6AM3_1_BR_Whole_C1_WGMRS_A44790_235MMJLT4_TGTTCCACTT_L002_R2_001",
+        "ID": "CF6AM3",
+        "SM": "CF6AM3",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6AM3",
+        "PL": "Illumina"
+        },
+
+    "CF6AM6":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6AM6_1_BR_Whole_C1_WGMRS_A44798_235MMJLT4_CAACGACTGA_L002_R1_001",
+        "fq2": "AM_CF6AM6_1_BR_Whole_C1_WGMRS_A44798_235MMJLT4_CAACGACTGA_L002_R2_001",
+        "ID": "CF6AM6",
+        "SM": "CF6AM6",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6AM6",
+        "PL": "Illumina"
+        },
+
+    "CF6AM7":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6AM7_1_BR_Whole_C1_WGMRS_A44806_235MMJLT4_GGAAGATCCG_L002_R1_001",
+        "fq2": "AM_CF6AM7_1_BR_Whole_C1_WGMRS_A44806_235MMJLT4_GGAAGATCCG_L002_R2_001",
+        "ID": "CF6AM7",
+        "SM": "CF6AM7",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6AM7",
+        "PL": "Illumina"
+        },
+
+    "CF6WT1":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6WT1_1_BR_Whole_C1_WGMRS_A44772_235MMJLT4_GCTTCAATCA_L002_R1_001",
+        "fq2": "AM_CF6WT1_1_BR_Whole_C1_WGMRS_A44772_235MMJLT4_GCTTCAATCA_L002_R2_001",
+        "ID": "CF6WT1",
+        "SM": "CF6WT1",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6WT1",
+        "PL": "Illumina"
+        },
+
+    "CF6WT2":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6WT2_1_BR_Whole_C1_WGMRS_A44780_235MMJLT4_TCTTAACTGG_L002_R1_001",
+        "fq2": "AM_CF6WT2_1_BR_Whole_C1_WGMRS_A44780_235MMJLT4_TCTTAACTGG_L002_R2_001",
+        "ID": "CF6WT2",
+        "SM": "CF6WT2",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6WT2",
+        "PL": "Illumina"
+        },
+
+    "CF6WT3":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6WT3_1_BR_Whole_C1_WGMRS_A44788_235MMJLT4_GACTGACATA_L002_R1_001",
+        "fq2": "AM_CF6WT3_1_BR_Whole_C1_WGMRS_A44788_235MMJLT4_GACTGACATA_L002_R2_001",
+        "ID": "CF6WT3",
+        "SM": "CF6WT3",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6WT3",
+        "PL": "Illumina"
+        },
+
+    "CF6WT6":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6WT6_1_BR_Whole_C1_WGMRS_A44796_235MMJLT4_TGCGACTTCG_L002_R1_001",
+        "fq2": "AM_CF6WT6_1_BR_Whole_C1_WGMRS_A44796_235MMJLT4_TGCGACTTCG_L002_R2_001",
+        "ID": "CF6WT6",
+        "SM": "CF6WT6",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6WT6",
+        "PL": "Illumina"
+        },
+
+    "CF6WT7":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CF6WT7_1_BR_Whole_C1_WGMRS_A44804_235MMJLT4_CGTATGTGAA_L002_R1_001",
+        "fq2": "AM_CF6WT7_1_BR_Whole_C1_WGMRS_A44804_235MMJLT4_CGTATGTGAA_L002_R2_001",
+        "ID": "CF6WT7",
+        "SM": "CF6WT7",
+        "PU": "235MMJLT4.2",
+        "LB": "CF6WT7",
+        "PL": "Illumina"
+        },
+
+    "CM6AM1":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6AM1_1_BR_Whole_C1_WGMRS_A44773_235MMJLT4_TGCGTGCGAA_L002_R1_001",
+        "fq2": "AM_CM6AM1_1_BR_Whole_C1_WGMRS_A44773_235MMJLT4_TGCGTGCGAA_L002_R2_001",
+        "ID": "CM6AM1",
+        "SM": "CM6AM1",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6AM1",
+        "PL": "Illumina"
+        },
+
+    "CM6AM2":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6AM2_1_BR_Whole_C1_WGMRS_A44781_235MMJLT4_GTCACATCCG_L002_R1_001",
+        "fq2": "AM_CM6AM2_1_BR_Whole_C1_WGMRS_A44781_235MMJLT4_GTCACATCCG_L002_R2_001",
+        "ID": "CM6AM2",
+        "SM": "CM6AM2",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6AM2",
+        "PL": "Illumina"
+        },
+
+    "CM6AM3":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6AM3_1_BR_Whole_C1_WGMRS_A44789_235MMJLT4_GCGATCCTTG_L002_R1_001",
+        "fq2": "AM_CM6AM3_1_BR_Whole_C1_WGMRS_A44789_235MMJLT4_GCGATCCTTG_L002_R2_001",
+        "ID": "CM6AM3",
+        "SM": "CM6AM3",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6AM3",
+        "PL": "Illumina"
+        },
+
+    "CM6AM6":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6AM6_1_BR_Whole_C1_WGMRS_A44797_235MMJLT4_TTGTCACGTT_L002_R1_001",
+        "fq2": "AM_CM6AM6_1_BR_Whole_C1_WGMRS_A44797_235MMJLT4_TTGTCACGTT_L002_R2_001",
+        "ID": "CM6AM6",
+        "SM": "CM6AM6",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6AM6",
+        "PL": "Illumina"
+        },
+
+    "CM6AM7":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6AM7_1_BR_Whole_C1_WGMRS_A44805_235MMJLT4_TACGTCACAA_L002_R1_001",
+        "fq2": "AM_CM6AM7_1_BR_Whole_C1_WGMRS_A44805_235MMJLT4_TACGTCACAA_L002_R2_001",
+        "ID": "CM6AM7",
+        "SM": "CM6AM7",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6AM7",
+        "PL": "Illumina"
+        },
+
+    "CM6WT1":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6WT1_1_BR_Whole_C1_WGMRS_A44771_235MMJLT4_TTGACCTAGC_L002_R1_001",
+        "fq2": "AM_CM6WT1_1_BR_Whole_C1_WGMRS_A44771_235MMJLT4_TTGACCTAGC_L002_R2_001",
+        "ID": "CM6WT1",
+        "SM": "CM6WT1",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6WT1",
+        "PL": "Illumina"
+        },
+
+    "CM6WT2":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6WT2_1_BR_Whole_C1_WGMRS_A44779_235MMJLT4_TAGATCCGAA_L002_R1_001",
+        "fq2": "AM_CM6WT2_1_BR_Whole_C1_WGMRS_A44779_235MMJLT4_TAGATCCGAA_L002_R2_001",
+        "ID": "CM6WT2",
+        "SM": "CM6WT2",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6WT2",
+        "PL": "Illumina"
+        },
+
+    "CM6WT3":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6WT3_1_BR_Whole_C1_WGMRS_A44787_235MMJLT4_CCAGTGATTG_L002_R1_001",
+        "fq2": "AM_CM6WT3_1_BR_Whole_C1_WGMRS_A44787_235MMJLT4_CCAGTGATTG_L002_R2_001",
+        "ID": "CM6WT3",
+        "SM": "CM6WT3",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6WT3",
+        "PL": "Illumina"
+        },
+
+    "CM6WT6":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6WT6_1_BR_Whole_C1_WGMRS_A44795_235MMJLT4_GTAGGTACAA_L002_R1_001",
+        "fq2": "AM_CM6WT6_1_BR_Whole_C1_WGMRS_A44795_235MMJLT4_GTAGGTACAA_L002_R2_001",
+        "ID": "CM6WT6",
+        "SM": "CM6WT6",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6WT6",
+        "PL": "Illumina"
+        },
+
+    "CM6WT7":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_CM6WT7_1_BR_Whole_C1_WGMRS_A44803_235MMJLT4_CGTGTGAGTG_L002_R1_001",
+        "fq2": "AM_CM6WT7_1_BR_Whole_C1_WGMRS_A44803_235MMJLT4_CGTGTGAGTG_L002_R2_001",
+        "ID": "CM6WT7",
+        "SM": "CM6WT7",
+        "PU": "235MMJLT4.2",
+        "LB": "CM6WT7",
+        "PL": "Illumina"
+        },
+
+    "DF6AM1":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6AM1_1_BR_Whole_C1_WGMRS_A44778_235MMJLT4_GCGTGTCATG_L002_R1_001",
+        "fq2": "AM_DF6AM1_1_BR_Whole_C1_WGMRS_A44778_235MMJLT4_GCGTGTCATG_L002_R2_001",
+        "ID": "DF6AM1",
+        "SM": "DF6AM1",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6AM1",
+        "PL": "Illumina"
+        },
+
+    "DF6AM2":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6AM2_1_BR_Whole_C1_WGMRS_A44786_235MMJLT4_CCAGAGTTCC_L002_R1_001",
+        "fq2": "AM_DF6AM2_1_BR_Whole_C1_WGMRS_A44786_235MMJLT4_CCAGAGTTCC_L002_R2_001",
+        "ID": "DF6AM2",
+        "SM": "DF6AM2",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6AM2",
+        "PL": "Illumina"
+        },
+
+    "DF6AM3":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6AM3_1_BR_Whole_C1_WGMRS_A44794_235MMJLT4_GCCTAATTCC_L002_R1_001",
+        "fq2": "AM_DF6AM3_1_BR_Whole_C1_WGMRS_A44794_235MMJLT4_GCCTAATTCC_L002_R2_001",
+        "ID": "DF6AM3",
+        "SM": "DF6AM3",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6AM3",
+        "PL": "Illumina"
+        },
+
+    "DF6AM6":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6AM6_1_BR_Whole_C1_WGMRS_A44802_235MMJLT4_AACGCCTGTG_L002_R1_001",
+        "fq2": "AM_DF6AM6_1_BR_Whole_C1_WGMRS_A44802_235MMJLT4_AACGCCTGTG_L002_R2_001",
+        "ID": "DF6AM6",
+        "SM": "DF6AM6",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6AM6",
+        "PL": "Illumina"
+        },
+
+    "DF6AM7":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6AM7_1_BR_Whole_C1_WGMRS_A44810_235MMJLT4_CTTATAGAGG_L002_R1_001",
+        "fq2": "AM_DF6AM7_1_BR_Whole_C1_WGMRS_A44810_235MMJLT4_CTTATAGAGG_L002_R2_001",
+        "ID": "DF6AM7",
+        "SM": "DF6AM7",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6AM7",
+        "PL": "Illumina"
+        },
+
+    "DF6WT1":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6WT1_1_BR_Whole_C1_WGMRS_A44776_235MMJLT4_GTAACATTGG_L002_R1_001",
+        "fq2": "AM_DF6WT1_1_BR_Whole_C1_WGMRS_A44776_235MMJLT4_GTAACATTGG_L002_R2_001",
+        "ID": "DF6WT1",
+        "SM": "DF6WT1",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6WT1",
+        "PL": "Illumina"
+        },
+
+    "DF6WT2":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6WT2_1_BR_Whole_C1_WGMRS_A44784_235MMJLT4_AACGGAGTCC_L002_R1_001",
+        "fq2": "AM_DF6WT2_1_BR_Whole_C1_WGMRS_A44784_235MMJLT4_AACGGAGTCC_L002_R2_001",
+        "ID": "DF6WT2",
+        "SM": "DF6WT2",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6WT2",
+        "PL": "Illumina"
+        },
+
+    "DF6WT3":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6WT3_1_BR_Whole_C1_WGMRS_A44792_235MMJLT4_AGACCGTTAA_L002_R1_001",
+        "fq2": "AM_DF6WT3_1_BR_Whole_C1_WGMRS_A44792_235MMJLT4_AGACCGTTAA_L002_R2_001",
+        "ID": "DF6WT3",
+        "SM": "DF6WT3",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6WT3",
+        "PL": "Illumina"
+        },
+
+    "DF6WT6":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6WT6_1_BR_Whole_C1_WGMRS_A44800_235MMJLT4_TGGTGGCTAG_L002_R1_001",
+        "fq2": "AM_DF6WT6_1_BR_Whole_C1_WGMRS_A44800_235MMJLT4_TGGTGGCTAG_L002_R2_001",
+        "ID": "DF6WT6",
+        "SM": "DF6WT6",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6WT6",
+        "PL": "Illumina"
+        },
+
+    "DF6WT7":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DF6WT7_1_BR_Whole_C1_WGMRS_A44808_235MMJLT4_ACAGCGTCAC_L002_R1_001",
+        "fq2": "AM_DF6WT7_1_BR_Whole_C1_WGMRS_A44808_235MMJLT4_ACAGCGTCAC_L002_R2_001",
+        "ID": "DF6WT7",
+        "SM": "DF6WT7",
+        "PU": "235MMJLT4.2",
+        "LB": "DF6WT7",
+        "PL": "Illumina"
+        },
+
+    "DM6AM1":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6AM1_1_BR_Whole_C1_WGMRS_A44777_235MMJLT4_CAACAATTCG_L002_R1_001",
+        "fq2": "AM_DM6AM1_1_BR_Whole_C1_WGMRS_A44777_235MMJLT4_CAACAATTCG_L002_R2_001",
+        "ID": "DM6AM1",
+        "SM": "DM6AM1",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6AM1",
+        "PL": "Illumina"
+        },
+
+    "DM6AM2":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6AM2_1_BR_Whole_C1_WGMRS_A44785_235MMJLT4_AGGTGTGACC_L002_R1_001",
+        "fq2": "AM_DM6AM2_1_BR_Whole_C1_WGMRS_A44785_235MMJLT4_AGGTGTGACC_L002_R2_001",
+        "ID": "DM6AM2",
+        "SM": "DM6AM2",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6AM2",
+        "PL": "Illumina"
+        },
+
+    "DM6AM3":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6AM3_1_BR_Whole_C1_WGMRS_A44793_235MMJLT4_ACTATTGACC_L002_R1_001",
+        "fq2": "AM_DM6AM3_1_BR_Whole_C1_WGMRS_A44793_235MMJLT4_ACTATTGACC_L002_R2_001",
+        "ID": "DM6AM3",
+        "SM": "DM6AM3",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6AM3",
+        "PL": "Illumina"
+        },
+
+    "DM6AM6":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6AM6_1_BR_Whole_C1_WGMRS_A44801_235MMJLT4_AGGCCAGGAT_L002_R1_001",
+        "fq2": "AM_DM6AM6_1_BR_Whole_C1_WGMRS_A44801_235MMJLT4_AGGCCAGGAT_L002_R2_001",
+        "ID": "DM6AM6",
+        "SM": "DM6AM6",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6AM6",
+        "PL": "Illumina"
+        },
+
+    "DM6AM7":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6AM7_1_BR_Whole_C1_WGMRS_A44809_235MMJLT4_TGTTACAAGG_L002_R1_001",
+        "fq2": "AM_DM6AM7_1_BR_Whole_C1_WGMRS_A44809_235MMJLT4_TGTTACAAGG_L002_R2_001",
+        "ID": "DM6AM7",
+        "SM": "DM6AM7",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6AM7",
+        "PL": "Illumina"
+        },
+
+    "DM6WT1":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6WT1_1_BR_Whole_C1_WGMRS_A44775_235MMJLT4_TGTATCGCGA_L002_R1_001",
+        "fq2": "AM_DM6WT1_1_BR_Whole_C1_WGMRS_A44775_235MMJLT4_TGTATCGCGA_L002_R2_001",
+        "ID": "DM6WT1",
+        "SM": "DM6WT1",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6WT1",
+        "PL": "Illumina"
+        },
+
+    "DM6WT2":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6WT2_1_BR_Whole_C1_WGMRS_A44783_235MMJLT4_CGGACTACTT_L002_R1_001",
+        "fq2": "AM_DM6WT2_1_BR_Whole_C1_WGMRS_A44783_235MMJLT4_CGGACTACTT_L002_R2_001",
+        "ID": "DM6WT2",
+        "SM": "DM6WT2",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6WT2",
+        "PL": "Illumina"
+        },
+
+    "DM6WT3":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6WT3_1_BR_Whole_C1_WGMRS_A44791_235MMJLT4_ATCCAATAGG_L002_R1_001",
+        "fq2": "AM_DM6WT3_1_BR_Whole_C1_WGMRS_A44791_235MMJLT4_ATCCAATAGG_L002_R2_001",
+        "ID": "DM6WT3",
+        "SM": "DM6WT3",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6WT3",
+        "PL": "Illumina"
+        },
+
+    "DM6WT6":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6WT6_1_BR_Whole_C1_WGMRS_A44799_235MMJLT4_GATTCGGCTA_L002_R1_001",
+        "fq2": "AM_DM6WT6_1_BR_Whole_C1_WGMRS_A44799_235MMJLT4_GATTCGGCTA_L002_R2_001",
+        "ID": "DM6WT6",
+        "SM": "DM6WT6",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6WT6",
+        "PL": "Illumina"
+        },
+
+    "DM6WT7":{
+        "fq_path": "/tgen_labs/jfryer/projects/dirty_mice/AM/bulkRNA/",
+        "fq1": "AM_DM6WT7_1_BR_Whole_C1_WGMRS_A44807_235MMJLT4_CATGTCAGCT_L002_R1_001",
+        "fq2": "AM_DM6WT7_1_BR_Whole_C1_WGMRS_A44807_235MMJLT4_CATGTCAGCT_L002_R2_001",
+        "ID": "DM6WT7",
+        "SM": "DM6WT7",
+        "PU": "235MMJLT4.2",
+        "LB": "DM6WT7",
+        "PL": "Illumina"
+        }
+}
