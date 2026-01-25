@@ -2,7 +2,7 @@
 Dirty mice that are either APP/MAPT (AM) or WT
 
 # dirty_mouse_cohousing
-7 month old mice that are either clean or dirty and either genotype APP/MAPT (AM) or WT. 
+6 month old mice that are either clean or dirty and either genotype APP/MAPT (AM) or WT. 
 RNA extracted from brain samples. 
 Groups are clean WT, clean AM, dirty WT and dirty AM (n=5 per sex per group, n= 40 total).
 
