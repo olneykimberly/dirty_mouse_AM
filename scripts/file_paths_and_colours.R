@@ -6,7 +6,7 @@ library(DESeq2)
 require(openxlsx)
 library(ggrepel)
 library(glmGamPoi)
-library(devtools)
+#library(devtools)
 library(reshape2)
 library(edgeR)  
 library(limma)  
@@ -71,10 +71,11 @@ makePaddedDataFrame <- function(l, ...) {
   data.frame(lapply(l, na.pad, len = maxlen), ...)
 }
 #----------------- Data
-metadata <- read.delim("/tgen_labs/jfryer/kolney/dirty_mice/dirty_mouse_cohousing/metadata.tsv", header = TRUE, sep = "\t")
+metadata <- read.delim("/tgen_labs/jfryer/kolney/dirty_mice/dirty_mouse_AM/metadata.tsv", header = TRUE, sep = "\t")
 # Order the groups and samples by group
+metadata$group
 info_ordered <- metadata %>%
-  dplyr::mutate(group = factor(group, levels = c("Clean", "Bedding", "CH"))) %>%
+  dplyr::mutate(group = factor(group, levels = c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM"))) %>%
   dplyr::arrange(group)
 
 # Ensure 'sample' is a factor with levels in the desired order (group-wise)

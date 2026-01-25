@@ -1,14 +1,14 @@
 ---
-title: "Differential expression - co-houseing mouse mRNA"
+title: "Differential expression - APP/MAPT versus WT dirty mice mRNA"
 author: "Kimberly Olney, PhD"
 date: "October 2025"
 output:
   pdf_document: default
 params:
-  project: CH
+  project: APPMAPT (AM)
 ---
 
-Compare clean, bedding, co-housed. 
+Compare AM versus WT mice, clean versus dirty 
 
 # Set up working enivornment
 ```{r setup, include=FALSE}
@@ -17,8 +17,8 @@ getwd()
 ```
 
 ```{r libraries, message=FALSE, warning=FALSE}
-source("/tgen_labs/jfryer/kolney/dirty_mice/dirty_mouse_cohousing/scripts/file_paths_and_colours.R")
-projectID <- "CH"
+source("/tgen_labs/jfryer/kolney/dirty_mice/dirty_mouse_AM/scripts/file_paths_and_colours.R")
+projectID <- "AM"
 ```
 
 # Create a counts matrix
@@ -27,7 +27,7 @@ This is the raw counts
 # path to counts files
 count_files <-
   file.path(paste0(
-    "../starAligned/",
+    "starAligned/",
     metadata$sample, "_STAR.bam", #  "_", metadata$group,"
     typeOfCount
   ))
@@ -71,7 +71,7 @@ count_data$V1 <- NULL
 # set column names to sample counts file name
 colnames(count_data) <- metadata$sample
 
-genes <- read.delim("ensembl_mouse_genes.txt")
+genes <- read.delim("scripts/ensembl_mouse_genes.txt")
 ```
 
 # Check inputs
@@ -94,8 +94,8 @@ table(dge$samples$sample)
 
 # Set factors and colors 
 ```{r factor_and_color_set}
-dge$samples$group <- factor(dge$samples$group, levels = c("Clean", "Bedding", "CH")) # 
-condition_colors <- c("skyblue", "orange", "brown")[dge$samples$group]
+dge$samples$group <- factor(dge$samples$group, levels = c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM")) # 
+condition_colors <- c("#56B4E9", "#009E73", "#F0E442", "#E69F00")[dge$samples$group]
 
 dge$samples$sex <- factor(dge$samples$sex, levels = c("F", "M"))
 sex_colors <- c("purple", "orange")[dge$samples$sex]
@@ -119,8 +119,8 @@ plotMDS(
   plot = TRUE,
   col = sex_colors
 )
-title(expression('Top 500 Genes - Raw (Log'[2] ~ 'CPM)'))
-saveToPDF(paste0("../results_", projectID, "/both_sexes/MDS/MDS_raw_sex.pdf"), width = 6, height = 6)
+title(expression('Top 100 Genes - Raw (Log'[2] ~ 'CPM)'))
+saveToPDF(paste0("results_", projectID, "/both_sexes/MDS/MDS_raw_sex.pdf"), width = 6, height = 6)
 ```
 
 
@@ -205,13 +205,13 @@ lcpm <- edgeR::cpm(dge.filtered.norm$counts, log = TRUE)
 lcpm_df <- as.data.frame(lcpm)
 lcpm_df$gene_id <- rownames(lcpm_df)
 lcpm_gene_names <- merge(genes, lcpm_df, by = "gene_id")
-write.table(lcpm_gene_names, paste0("../results_", projectID, "/both_sexes/counts/filtered_lcpm_gene_names.txt"), sep= "\t", row.names = FALSE, quote=FALSE)
+write.table(lcpm_gene_names, paste0("results_", projectID, "/both_sexes/counts/filtered_lcpm_gene_names.txt"), sep= "\t", row.names = FALSE, quote=FALSE)
 
 cpm <- edgeR::cpm(dge.filtered.norm$counts, log = FALSE)
 cpm_df <- as.data.frame(cpm)
 cpm_df$gene_id <- rownames(cpm_df)
 cpm_gene_names <- merge(genes, cpm_df, by = "gene_id")
-write.table(cpm_gene_names, paste0("../results_", projectID, "/both_sexes/counts/filtered_cpm_gene_names.txt"), sep= "\t", row.names = FALSE, quote=FALSE)
+write.table(cpm_gene_names, paste0("results_", projectID, "/both_sexes/counts/filtered_cpm_gene_names.txt"), sep= "\t", row.names = FALSE, quote=FALSE)
 ```
 
 # Filtered MDS
@@ -228,7 +228,7 @@ plotMDS(
   col = condition_colors
 )
 title(expression('Top 500 Genes - Filtered (Log'[2] ~ 'CPM)'))
-saveToPDF(paste0("../results_", projectID, "/both_sexes/MDS/MDS_filtered_condition.pdf"), width = 6, height = 6)
+saveToPDF(paste0("results_", projectID, "/both_sexes/MDS/MDS_filtered_condition.pdf"), width = 6, height = 6)
 ```
 
 # Density plot
@@ -272,7 +272,7 @@ for (i in 2:nsamples) {
 }
 
 # save
-path <- (paste0("../results_", projectID, "/both_sexes/library/gene_density"))
+path <- (paste0("results_", projectID, "/both_sexes/library/gene_density"))
 saveToPDF(paste0(path, ".pdf"), width = 7, height = 5)
 ```
 
@@ -336,7 +336,7 @@ axis(
   las = 2,
   cex.axis = 0.8
 )
-path <- (paste0("../results_", projectID, "/both_sexes/library/lcpm_boxplots"))
+path <- (paste0("results_", projectID, "/both_sexes/library/lcpm_boxplots"))
 saveToPDF(paste0(path, ".pdf"), width = 11, height = 5)
 
 # clean up
@@ -349,23 +349,27 @@ info <- as.data.frame(dge.filtered.norm$samples)
 
 info <- extract_gene_cpm("Uty", cpm_gene_names, info)
 info <- extract_gene_cpm("Omp", cpm_gene_names, info)
-info <- extract_gene_cpm("Hbb", cpm_gene_names, info)
+info <- extract_gene_cpm("Hbb-bs", cpm_gene_names, info)
 info <- extract_gene_cpm("Ttr", cpm_gene_names, info)
 
 # Gather the expression for the four genes into a long format for easy plotting
 plot_data <- info %>%
-  dplyr::select(sample, group, Uty, Omp, Hbb, Ttr) %>%
-  tidyr::gather(key = "Gene", value = "Expression", Uty, Omp, Hbb, Ttr) %>%
+  # Use backticks around Hbb-bs
+  dplyr::select(sample, group, Uty, Omp, `Hbb-bs`, Ttr) %>%
+  # Using pivot_longer (the modern replacement for gather)
+  tidyr::pivot_longer(
+    cols = c(Uty, Omp, `Hbb-bs`, Ttr), 
+    names_to = "Gene", 
+    values_to = "Expression"
+  ) %>%
   dplyr::mutate(
-    # Order the groups for plotting
-    group = factor(group, levels = c("Clean", "Bedding", "CH")),
-    # Order the genes for plotting
-    Gene = factor(Gene, levels = c("Uty", "Omp", "Hbb", "Ttr"))
+    group = factor(group, levels = c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM")),
+    Gene = factor(Gene, levels = c("Uty", "Omp", "Hbb-bs", "Ttr"))
   )
 
 # Create a list of plots, one for each gene
 gene_plots <- list()
-genes_to_plot <- c("Uty", "Omp", "Hbb", "Ttr") # Only plotting the newly requested genes
+genes_to_plot <- c("Uty", "Omp", "Hbb-bs", "Ttr") # Only plotting the newly requested genes
 
 for (g in genes_to_plot) {
   p <- plot_data %>%
@@ -377,7 +381,6 @@ for (g in genes_to_plot) {
       x = "Experimental Group",
       y = "CPM"
     ) +
-    scale_fill_manual(values = c("Clean" = "skyblue", "Bedding" = "orange", "CH" = "brown")) +
     theme_minimal() +
     theme(
       legend.position = "none",
@@ -396,13 +399,13 @@ for (g in genes_to_plot) {
 combined_plot <- cowplot::plot_grid(
   gene_plots[["Uty"]],
   gene_plots[["Omp"]],
-  gene_plots[["Hbb"]],
+  gene_plots[["Hbb-bs"]],
   gene_plots[["Ttr"]],
   ncol = 2 # Display in a single row
 )
 
 # Save the combined plot to PDF
-path_plot <- paste0("../results_", projectID, "/both_sexes/gene_expression_checks/Uty_Omp_Hbb_Ttr_expression.pdf")
+path_plot <- paste0("results_", projectID, "/both_sexes/gene_expression_checks/Uty_Omp_Hbb_Ttr_expression.pdf")
 ggsave(path_plot, combined_plot, width = 14, height = 6)
 
 print(combined_plot)
@@ -426,7 +429,7 @@ voom_with_weights <-
     BPPARAM = BiocParallel::SnowParam(8),
     plot = TRUE
   )
-path <- paste0(paste0("../results_", projectID, "/both_sexes/voom/voom_raw"))
+path <- paste0(paste0("results_", projectID, "/both_sexes/voom/voom_raw"))
 saveToPDF(paste0(path, ".pdf"), width = 6, height = 4)
 voomCounts <- voom_with_weights$E
 rm(voom_with_weights, formula)
@@ -449,26 +452,26 @@ varPart <- fitExtractVarPartModel(voomCounts, form_varPart, sorted_info)
 # Plot VarPart
 ```{r plot_varPart}
 plotVarPart(sortCols(varPart), label.angle = 80)
-saveToPDF(paste0("../results_", projectID, "/both_sexes/variance/variance_partition_violins.pdf"), width = 8.5, height = 5)
+saveToPDF(paste0("results_", projectID, "/both_sexes/variance/variance_partition_violins.pdf"), width = 8.5, height = 5)
 
 varPart$gene_id <- rownames(varPart)
 # merge with gene information to get gene names for gene_id
 variance_explained <- merge(varPart, genes, by = "gene_id")
 
-write.table(variance_explained, paste0("../results_", projectID, "/both_sexes/variance/variance_explained.tsv"),sep = "\t", quote = FALSE, row.names = FALSE)
+write.table(variance_explained, paste0("results_", projectID, "/both_sexes/variance/variance_explained.tsv"),sep = "\t", quote = FALSE, row.names = FALSE)
 ```
 
 
 # CCA 
 Canonical Correlation Analysis
 ```{r}
-form <- ~ group  + sex + collection_date + RIN
+form <- ~ group + genotype + C_or_D + sex + collection_date + RIN
 # Compute Canonical Correlation Analysis (CCA) # between all pairs of variables
 # returns absolute correlation value
 C = canCorPairs(form, sorted_info)
 # Plot correlation matrix
 plotCorrMatrix( C )
-saveToPDF(paste0("../results_", projectID, "/both_sexes/variance/CCA.pdf"), width = 5, height = 5)
+saveToPDF(paste0("results_", projectID, "/both_sexes/variance/CCA.pdf"), width = 5, height = 5)
 
 rm(form, C)
 ```
@@ -484,7 +487,7 @@ p <- info %>%
       x = "Experimental Group",
       y = "RIN"
     ) +
-    scale_fill_manual(values = c("Clean" = "skyblue", "Bedding" = "orange", "CH" = "brown")) +
+    scale_fill_manual(values = c("clean_WT" = "#56B4E9", "clean_AM" = "#009E73", "dirty_WT" = "#F0E442", "dirty_AM" = "#E69F00")) +
     theme_minimal() +
     theme(
       legend.position = "none",
@@ -492,14 +495,14 @@ p <- info %>%
      axis.title.x = element_blank() # x-axis title not needed with the facet title
     )
 p
-saveToPDF(paste0("../results_", projectID, "/both_sexes/variance/RIN.pdf"), width = 5, height = 5)
+saveToPDF(paste0("results_", projectID, "/both_sexes/variance/RIN.pdf"), width = 5, height = 5)
 
 ```
 
 # Design matrix
 ```{r design_matrix}
 design <- model.matrix( ~ 0 + dge.filtered.norm$samples$group + dge.filtered.norm$samples$sex + dge.filtered.norm$samples$RIN)
-colnames(design) <- c("Clean", "Bedding", "CH", "sex", "RIN")
+colnames(design) <- c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM", "sex", "RIN")
 # Inspect
 design
 ```
@@ -523,9 +526,10 @@ fit <- lmFit(v, design) # voom_cov
 coef.fit <- fit$coefficients
 
 contrasts <- makeContrasts(
-  Bedding_vs_Clean = Bedding - Clean,
-  CH_vs_Clean = CH - Clean,
-  CH_vs_Bedding = CH - Bedding,
+  clean_AM_vs_clean_WT = clean_AM - clean_WT,
+  dirty_AM_vs_dirty_WT = dirty_AM - dirty_WT,
+  dirty_WT_vs_clean_WT = dirty_WT - clean_WT,
+  dirty_AM_vs_clean_AM = dirty_AM - clean_AM,
   levels = colnames(design))
 head(contrasts)
 
@@ -559,7 +563,7 @@ sumTable <-
 
 print(paste0(" q < ", qval, " & absolute log2-fold change > ", lfc.cutoff))
 sumTable
-#write.table(sumTable, paste0("../results_", projectID, "/both_sexes/DEGs/DEGs_summary_q", qval,"_log2FC", lfc.cutoff, ".txt"), quote = FALSE, sep = "\t")
+#write.table(sumTable, paste0("results_", projectID, "/both_sexes/DEGs/DEGs_summary_q", qval,"_log2FC", lfc.cutoff, ".txt"), quote = FALSE, sep = "\t")
 genes_relevant <- dge.filtered.norm$genes
 
 #rm(sumTable)
@@ -578,7 +582,7 @@ sumTable <- t(sumTable)
 colnames(sumTable) <- row_names_to_keep
 df <- as.data.frame(sumTable)
 
-pdf(paste0("../results_", projectID, "/both_sexes/DEGs/DEGs_heatmap.pdf"), height = 6, width = 6)
+pdf(paste0("results_", projectID, "/both_sexes/DEGs/DEGs_heatmap.pdf"), height = 6, width = 6)
 pheatmap::pheatmap(df,
                    main = paste0("q < ", qval, " & |log2FC| > ", lfc.cutoff),
                    treeheight_row = 0,
@@ -597,7 +601,7 @@ dev.off()
 ```{r DGE_check, eval=FALSE}
 DEG_check <- topTable(
   veBayesFit, 
-  coef = "CH_vs_Clean",  
+  coef = "clean_AM_vs_clean_WT",  
   n = Inf, 
   p.value = 1,
   lfc = 0, 
@@ -623,8 +627,8 @@ for (i in allComparisons) {
     confint = TRUE # column of confidence interval 
     )
     saveRDS(vTopTableAll, file = 
-            paste0("../rObjects/gene_tables/", i,"_gene_table.rds"))
-  path <- paste0("../results_", projectID, "/both_sexes/DEGs/", i, "_q1.00.txt", sep = "") 
+            paste0("rObjects/gene_tables/", i,"_gene_table.rds"))
+  path <- paste0("results_", projectID, "/both_sexes/DEGs/", i, "_q1.00.txt", sep = "") 
   write.table(vTopTableAll, path, sep = "\t", row.names = FALSE, quote = FALSE)
   
   # p < 0.05, log2fc > 1
@@ -637,7 +641,7 @@ for (i in allComparisons) {
       lfc = lfc.cutoff,
       genelist = genes_relevant, 
       confint = TRUE)
-  path <- paste0("../results_", projectID, "/both_sexes/DEGs/", i, "_q", qval, "_lfc", lfc.cutoff,".txt", sep = "") 
+  path <- paste0("results_", projectID, "/both_sexes/DEGs/", i, "_q", qval, "_lfc", lfc.cutoff,".txt", sep = "") 
   write.table(vTopTableSig, path, sep = "\t", row.names = FALSE, quote = FALSE)
   # increment 
   coef <- coef + 1
@@ -675,19 +679,19 @@ pcaWithMetadata <- merge(dim1_10, sorted_info, by = "sample", all = TRUE)
 ggplot(data = pcaWithMetadata, aes(x = PC1, y = PC2, shape = group, color = group)) +
   geom_point(size = 2.5) +
   theme_bw() 
-saveToPDF(paste0("../results_", projectID, "/both_sexes/PCA/PCA_dim1&2.pdf"), width = 6, height = 5)
+saveToPDF(paste0("results_", projectID, "/both_sexes/PCA/PCA_dim1&2.pdf"), width = 6, height = 5)
 
 ggplot(data = pcaWithMetadata, aes(x = PC1, y = PC2, shape = sex, color = sex)) +
   geom_point(size = 2.5) +
   theme_bw() 
-saveToPDF(paste0("../results_", projectID, "/both_sexes/PCA/PCA_dim1&2_sex.pdf"), width = 6, height = 5)
+saveToPDF(paste0("results_", projectID, "/both_sexes/PCA/PCA_dim1&2_sex.pdf"), width = 6, height = 5)
 
 ggplot(data = pcaWithMetadata, aes(x = PC2, y = PC3, shape = group, color = group)) +
   geom_point(size = 2.5) +
   theme_bw() 
-saveToPDF(paste0("../results_", projectID, "/both_sexes/PCA/PCA_dim2&3.pdf"), width = 6, height = 5)
+saveToPDF(paste0("results_", projectID, "/both_sexes/PCA/PCA_dim2&3.pdf"), width = 6, height = 5)
 
-write.table(pcaWithMetadata, paste0("../results_", projectID, "/both_sexes/PCA/PCA_metadata.txt"), quote = FALSE, sep = "\t")
+write.table(pcaWithMetadata, paste0("results_", projectID, "/both_sexes/PCA/PCA_metadata.txt"), quote = FALSE, sep = "\t")
 ```
 
 
@@ -697,7 +701,7 @@ negFC <- 0
 posFC <- 0
 for (i in allComparisons) {
   group1_vs_group2 <-
-    read.delim(paste0("../results_", projectID, "/both_sexes/DEGs/", i,"_q1.00.txt"))
+    read.delim(paste0("results_", projectID, "/both_sexes/DEGs/", i,"_q1.00.txt"))
     i <- gsub("_", " ", i)
     if (!any(group1_vs_group2$adj.P.Val < qval, na.rm = TRUE)) {
     # If there are no significant DEGs, create a volcano plot with all points in gray
@@ -719,7 +723,7 @@ for (i in allComparisons) {
            y = expression(-log[10] ~ "(" ~ italic("p") ~ "-value)")) +
       ggtitle(paste0(i, "\nNo significant DEGs found"))
     i <- gsub(" ", "_", i)
-    pdf(paste0("../results_", projectID, "/both_sexes/volcano/", i, ".pdf"), height = 6, width = 6)
+    pdf(paste0("results_", projectID, "/both_sexes/volcano/", i, ".pdf"), height = 6, width = 6)
     print(p)
     dev.off()
   } else {
@@ -849,7 +853,7 @@ for (i in allComparisons) {
     p
     i <- gsub(" ", "_", i)
     # save
-    path <-paste0("../results_", projectID, "/both_sexes/volcano/",i)
+    path <-paste0("results_", projectID, "/both_sexes/volcano/",i)
     pdf(paste0(path, ".pdf"),
         height = 6,
         width = 6)
@@ -871,7 +875,7 @@ remove(up, up10, upFold, group1_vs_group2, downFold, down10, data, p, my_colors)
 ```{r excel}
 # first read in the files
 for (i in allComparisons) {
-  filepath <- paste0("../results_", projectID, "/both_sexes/DEGs/", i,"_q1.00.txt")
+  filepath <- paste0("results_", projectID, "/both_sexes/DEGs/", i,"_q1.00.txt")
   assign(paste0(i),
          read.delim(filepath, header = TRUE, sep = "\t",stringsAsFactors = FALSE))
 }
@@ -882,14 +886,14 @@ list_of_datasets <- list(
   "CH_vs_Clean" = CH_vs_Clean,
   "CH_vs_Bedding" = CH_vs_Bedding
 )
-write.xlsx(list_of_datasets, file = paste0("../results_", projectID, "/both_sexes/DEGs/DEGs.q1.00.xlsx"))
+write.xlsx(list_of_datasets, file = paste0("results_", projectID, "/both_sexes/DEGs/DEGs.q1.00.xlsx"))
 ```
 
 # Master DEG table
 ```{r}
 # Columns:
 df_list <- list()
-base_path <- paste0("../results_", projectID, "/both_sexes/DEGs/")
+base_path <- paste0("results_", projectID, "/both_sexes/DEGs/")
 for (comparison_name in allComparisons) {
   file_path <- paste0(base_path, comparison_name, "_q1.00.txt")
   temp_df <- read.delim(file_path)
@@ -902,13 +906,13 @@ df <- df[,c(16,4,8:10,14,11,13,1,3)]
 str(df)
 
 df <- df[order(df$gene_name),]
-write.table(df, file = paste0("../results_", projectID, "/both_sexes/DEGs/DEGs_AllComparisons.txt"),sep = "\t", quote = FALSE, row.names = FALSE)
-saveRDS(dge.filtered.norm, "../rObjects/dge.filtered.norm.bothsexes.rds")
+write.table(df, file = paste0("results_", projectID, "/both_sexes/DEGs/DEGs_AllComparisons.txt"),sep = "\t", quote = FALSE, row.names = FALSE)
+saveRDS(dge.filtered.norm, "rObjects/dge.filtered.norm.bothsexes.rds")
 ```
 
 # UpSet
 ```{r read_DEG_table}
-base_path <- paste0("../results_", projectID, "/both_sexes/DEGs/")
+base_path <- paste0("results_", projectID, "/both_sexes/DEGs/")
 
 for (i in allComparisons) {
   file_path <- paste0(base_path, i, "_q1.00.txt")
@@ -994,14 +998,14 @@ upset_gene <- upset(data, set_sizes = FALSE,
 upset_gene
 
 # save
-path <- paste0("../results_", projectID, 
+path <- paste0("results_", projectID, 
                "/both_sexes/upset/UpSet_DEGs_q0.05")
 saveToPDF(paste0(path, ".pdf"), width = 4, height = 4)
 
 # Binary table with colnames:
 write.table(
   data,
-  paste0("../results_", projectID, 
+  paste0("results_", projectID, 
                "/both_sexes/upset/UpSet_list_binary_results.txt"),
   sep = "\t",
   quote = FALSE
