@@ -1,0 +1,628 @@
+---
+title: "Differential expression - APP/MAPT versus WT dirty mice mRNA"
+author: "Kimberly Olney, PhD"
+date: "January 2026"
+output:
+  pdf_document: default
+params:
+  project: APPMAPT (AM)
+---
+
+Compare AM versus WT mice, clean versus dirty 
+
+# Set up working enivornment
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = ".")
+getwd()
+```
+
+```{r libraries, message=FALSE, warning=FALSE}
+source("/tgen_labs/jfryer/kolney/dirty_mice/dirty_mouse_AM/scripts/file_paths_and_colours.R")
+projectID <- "AM"
+```
+
+# Create a counts matrix
+This is the raw counts 
+```{r raw_counts}
+# path to counts files
+count_files <-
+  file.path(paste0(
+    "starAligned/",
+    metadata$sample, "_STAR.bam", #  "_", metadata$group,"
+    typeOfCount
+  ))
+# add sample counts name to the counts files
+names(count_files) <- paste0(metadata$sample)
+# Inspect 
+table(metadata$sample)
+
+# Create the counts matrix 
+count_data <- data.frame(fread(count_files[1]))[c(1,4)] # forth column for RF reads 
+# Loop and read the 4th column
+for(i in 2:length(count_files)) {
+        count_data <- cbind(count_data, data.frame(fread(count_files[i]))[4])
+}
+# set gene_id as the row name
+row.names(count_data) <- count_data$V1
+```
+
+# Mapping metrics
+```{r mapping_metrics}
+star_metrics <- data.frame(count_data[count_data$V1 %like% "N_", ])
+star_metrics$V1 <- as.vector(star_metrics$V1)
+melt_star_metrics <- reshape2::melt(star_metrics, id = c("V1"))
+ggplot(melt_star_metrics, aes(x = value, fill = V1)) + 
+  geom_histogram(position = "identity", bins = 100) + 
+  facet_grid(V1 ~ .)  + theme_bw()
+```
+
+clean up
+```{r}
+remove(melt_star_metrics, star_metrics, i, count_files)
+```
+
+# Format counts table
+```{r counts_table}
+# remove star metric information
+count_data <- count_data[!grepl("N_", count_data$V1),]
+# set gene_id (i.e. V1) as the row name
+row.names(count_data) <- count_data$V1
+count_data$V1 <- NULL
+# set column names to sample counts file name
+colnames(count_data) <- metadata$sample
+
+genes <- read.delim("scripts/ensembl_mouse_genes.txt")
+```
+
+# Check inputs
+```{r check_inputs}
+all.equal(rownames(count_data), genes$gene_id) # gene ids match the count rows
+all.equal(as.character(colnames(count_data)), as.character(metadata$sample))
+```
+
+# Create DGE object
+```{r DGE_object}
+# create object
+dge <- DGEList(counts = count_data,
+               samples = metadata,
+               genes = genes)
+
+# Inspect
+table(dge$samples$group)
+table(dge$samples$sample)
+
+# Split by sex
+male_samples <- dge$samples$sex == "M"
+female_samples <- dge$samples$sex == "F"
+
+dge_male <- dge[, male_samples]
+dge_female <- dge[, female_samples]
+```
+
+# Set factors and colors 
+```{r factor_and_color_set}
+dge$samples$group <- factor(dge$samples$group, levels = c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM")) # 
+condition_colors <- c("#56B4E9", "#009E73", "#F0E442", "#E69F00")[dge$samples$group]
+
+dge$samples$sex <- factor(dge$samples$sex, levels = c("F", "M"))
+sex_colors <- c("purple", "orange")[dge$samples$sex]
+
+dge_male$samples$group <- factor(dge_male$samples$group, levels = c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM")) # 
+condition_colors <- c("#56B4E9", "#009E73", "#F0E442", "#E69F00")[dge_male$samples$group]
+
+dge_female$samples$group <- factor(dge_female$samples$group, levels = c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM")) # 
+condition_colors <- c("#56B4E9", "#009E73", "#F0E442", "#E69F00")[dge_female$samples$group]
+```
+
+# Raw CPM
+```{r raw_cpm}
+lcpm <- edgeR::cpm(dge$counts, log = TRUE)
+lcpm_male <- edgeR::cpm(dge_male$counts, log = TRUE)
+lcpm_female<- edgeR::cpm(dge_female$counts, log = TRUE)
+```
+
+# Raw MDS
+```{r raw_MDS}
+# Condition
+par(bg = 'white')
+plotMDS(
+  lcpm,
+  top = 100,
+  labels = dge$samples$sample,
+  cex = 1,
+  dim.plot = c(1, 2),
+  plot = TRUE,
+  col = sex_colors
+)
+title(expression('Top 100 Genes - Raw (Log'[2] ~ 'CPM)'))
+saveToPDF(paste0("results_", projectID, "/both_sexes/MDS/MDS_raw_sex.pdf"), width = 6, height = 6)
+
+
+par(bg = 'white')
+plotMDS(
+  lcpm_male,
+  top = 100,
+  labels = dge_male$samples$sample,
+  cex = 1,
+  dim.plot = c(1, 2),
+  plot = TRUE,
+  col = condition_colors
+)
+title(expression('Top 100 Genes - Raw (Log'[2] ~ 'CPM)'))
+saveToPDF(paste0("results_", projectID, "/sex_stratified/MDS/MDS_raw_male.pdf"), width = 6, height = 6)
+
+
+par(bg = 'white')
+plotMDS(
+  lcpm_female,
+  top = 100,
+  labels = dge_female$samples$sample,
+  cex = 1,
+  dim.plot = c(1, 2),
+  plot = TRUE,
+  col = condition_colors
+)
+title(expression('Top 100 Genes - Raw (Log'[2] ~ 'CPM)'))
+saveToPDF(paste0("results_", projectID, "/sex_stratified/MDS/MDS_raw_female.pdf"), width = 6, height = 6)
+```
+
+
+# Remove mitochondrial genes
+```{r MT_genes}
+dim(dge) # inspect
+removeMT <- dge$genes$Chr != "chrM"  # true when NOT MT
+table(removeMT) # inspect
+dge <- dge[removeMT,,keep.lib.sizes = FALSE]
+dim(dge)
+
+
+dim(dge_male) # inspect
+removeMT <- dge_male$genes$Chr != "chrM"  # true when NOT MT
+table(removeMT) # inspect
+dge_male <- dge_male[removeMT,,keep.lib.sizes = FALSE]
+dim(dge_male)
+
+
+dim(dge_female) # inspect
+removeMT <- dge_female$genes$Chr != "chrM"  # true when NOT MT
+table(removeMT) # inspect
+dge_female <- dge_female[removeMT,,keep.lib.sizes = FALSE]
+dim(dge_female)
+```
+
+# Keep only protein coding genes 
+```{r MT_genes}
+dim(dge)
+table(dge$genes$gene_type)
+removeMT <- dge$genes$gene_type == "protein_coding"  # true when NOT MT
+dge <- dge[removeMT,,keep.lib.sizes = FALSE]
+dim(dge)
+
+
+dim(dge_male)
+table(dge_male$genes$gene_type)
+removeMT <- dge_male$genes$gene_type == "protein_coding"  # true when NOT MT
+dge_male <- dge_male[removeMT,,keep.lib.sizes = FALSE]
+dim(dge_male)
+
+
+dim(dge_female)
+table(dge_female$genes$gene_type)
+removeMT <- dge_female$genes$gene_type == "protein_coding"  # true when NOT MT
+dge_female <- dge_female[removeMT,,keep.lib.sizes = FALSE]
+dim(dge_female)
+```
+
+# Library sizes
+```{r library}
+# before filtering
+L <- mean(dge$samples$lib.size) * 1e-6
+M <- median(dge$samples$lib.size) * 1e-6
+c(L, M)
+
+
+L_male <- mean(dge_male$samples$lib.size) * 1e-6
+M_male <- median(dge_male$samples$lib.size) * 1e-6
+c(L_male, M_male)
+
+L_female <- mean(dge_female$samples$lib.size) * 1e-6
+M_female <- median(dge_female$samples$lib.size) * 1e-6
+c(L_female, M_female)
+```
+
+# Filtering 
+The filterByExpr() function in the edgeR package determines which genes have a great enough count value to keep.  
+We will filter by group_sex.  
+```{r filter_counts}
+# first filter by expression
+dim(dge)
+keep.expr <-
+  filterByExpr(
+    dge,
+    group = dge$samples$group, # by disease groups
+    min.count = M, # min count of 1 CPM 
+  )
+dge.filtered <- dge[keep.expr, ,keep.lib.sizes = FALSE]
+dim(dge.filtered)
+table(dge.filtered$genes$gene_type)
+
+
+
+dim(dge_male)
+keep.expr <-
+  filterByExpr(
+    dge_male,
+    group = dge_male$samples$group, # by disease groups
+    min.count = M_male, # min count of 1 CPM 
+  )
+dge.filtered.male <- dge_male[keep.expr, ,keep.lib.sizes = FALSE]
+dim(dge.filtered.male)
+table(dge.filtered.male$genes$gene_type)
+
+
+dim(dge_female)
+keep.expr <-
+  filterByExpr(
+    dge_female,
+    group = dge_female$samples$group, # by disease groups
+    min.count = M_female, # min count of 1 CPM 
+  )
+dge.filtered.female <- dge_female[keep.expr, ,keep.lib.sizes = FALSE]
+dim(dge.filtered.female)
+table(dge.filtered.female$genes$gene_type)
+```
+
+# TMM
+For estimating relative RNA production levels from RNA-seq data. 
+The TMM method estimates scale factors between samples that can be incorporated 
+into currently used statistical methods for DE analysis.
+```{r TMM}
+# Now, method of trimmed mean of M-values (TMM)
+# Calculate scaling factors to convert raw library sizes into effective library sizes.
+dge.filtered.norm <- calcNormFactors(dge.filtered, method = "TMM")
+
+# norm factor summary
+summary(dge.filtered.norm$samples$norm.factors)
+normfactors <- (dge.filtered.norm$samples$norm.factors)
+
+dge.filtered.norm.male <- calcNormFactors(dge.filtered.male, method = "TMM")
+
+# norm factor summary
+summary(dge.filtered.norm.male$samples$norm.factors)
+normfactors_male <- (dge.filtered.norm.male$samples$norm.factors)
+
+dge.filtered.norm.female <- calcNormFactors(dge.filtered.female, method = "TMM")
+
+# norm factor summary
+summary(dge.filtered.norm.female$samples$norm.factors)
+normfactors_female <- (dge.filtered.norm.female$samples$norm.factors)
+```
+
+# Gene_id to gene_name
+Some of the gene_names are duplicated. Our counts matrix has rownames by gene_id which are not duplicated. Since we have now filtered and normalized we can check to see if duplicated gene_names still exist.  If none do, rename rows to gene_name.  If there are duplicates, handle the error and then rename columns.
+```{r gene_name}
+# check for duplication
+table(duplicated(dge.filtered.norm$genes$gene_name))
+
+# replace NA gene names with gene_id first
+dge.filtered.norm$genes <- dge.filtered.norm$genes %>%
+  mutate(gene_name = coalesce(gene_name, gene_id))
+
+# replace duplicated gene names after the first occurrence with gene_id
+dge.filtered.norm$genes <- dge.filtered.norm$genes %>%
+  mutate(
+    gene_name = if_else(
+      duplicated(gene_name),
+      gene_id,
+      gene_name
+    )
+  )
+
+# check duplication
+table(duplicated(dge.filtered.norm$genes$gene_name))
+
+
+# replace NA gene names with gene_id first
+dge.filtered.norm.male$genes <- dge.filtered.norm.male$genes %>%
+  mutate(gene_name = coalesce(gene_name, gene_id))
+
+# replace duplicated gene names after the first occurrence with gene_id
+dge.filtered.norm.male$genes <- dge.filtered.norm.male$genes %>%
+  mutate(
+    gene_name = if_else(
+      duplicated(gene_name),
+      gene_id,
+      gene_name
+    )
+  )
+
+# replace NA gene names with gene_id first
+dge.filtered.norm.female$genes <- dge.filtered.norm.female$genes %>%
+  mutate(gene_name = coalesce(gene_name, gene_id))
+
+# replace duplicated gene names after the first occurrence with gene_id
+dge.filtered.norm.female$genes <- dge.filtered.norm.female$genes %>%
+  mutate(
+    gene_name = if_else(
+      duplicated(gene_name),
+      gene_id,
+      gene_name
+    )
+  )
+```
+
+# Clean up
+```{r cleanup}
+rm(count_data, lcpm, keep.expr, normfactors, removeMT, L, M, typeOfCount)
+```
+
+
+# Voom 
+voom transform counts to use for variancePartition  
+```{r voom, warning=FALSE}
+formula <- (~ 0 + group)
+counts <- as.data.frame(dge.filtered.norm$counts)
+info <- as.data.frame(dge.filtered.norm$samples)
+voom_with_weights <-
+  variancePartition::voomWithDreamWeights(
+    counts = counts,
+    formula = formula,
+    data = info,
+    BPPARAM = BiocParallel::SnowParam(8),
+    plot = TRUE
+  )
+path <- paste0(paste0("results_", projectID, "/both_sexes/voom/voom_raw"))
+saveToPDF(paste0(path, ".pdf"), width = 6, height = 4)
+voomCounts <- voom_with_weights$E
+rm(voom_with_weights)
+
+
+formula <- (~ 0 + group)
+counts_male <- as.data.frame(dge.filtered.norm.male$counts)
+info_male <- as.data.frame(dge.filtered.norm.male$samples)
+voom_with_weights_male <-
+  variancePartition::voomWithDreamWeights(
+    counts = counts_male,
+    formula = formula,
+    data = info_male,
+    BPPARAM = BiocParallel::SnowParam(8),
+    plot = TRUE
+  )
+path <- paste0(paste0("results_", projectID, "/sex_stratified/voom/voom_raw_male"))
+saveToPDF(paste0(path, ".pdf"), width = 6, height = 4)
+voomCounts <- voom_with_weights_male$E
+rm(voom_with_weights_male)
+
+
+formula <- (~ 0 + group)
+counts_female <- as.data.frame(dge.filtered.norm.female$counts)
+info_female <- as.data.frame(dge.filtered.norm.female$samples)
+voom_with_weights_female <-
+  variancePartition::voomWithDreamWeights(
+    counts = counts_female,
+    formula = formula,
+    data = info_female,
+    BPPARAM = BiocParallel::SnowParam(8),
+    plot = TRUE
+  )
+path <- paste0(paste0("results_", projectID, "/sex_stratified/voom/voom_raw_female"))
+saveToPDF(paste0(path, ".pdf"), width = 6, height = 4)
+voomCounts <- voom_with_weights_female$E
+rm(voom_with_weights_female)
+```
+
+
+# Design matrix
+```{r design_matrix}
+design <- model.matrix( ~ 0 + dge.filtered.norm$samples$group + dge.filtered.norm$samples$sex + dge.filtered.norm$samples$RIN)
+colnames(design) <- c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM", "sex", "RIN")
+# Inspect
+design
+
+design_male <- model.matrix( ~ 0 + dge.filtered.norm.male$samples$group + dge.filtered.norm.male$samples$RIN)
+colnames(design_male) <- c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM", "RIN")
+# Inspect
+design_male
+
+design_female <- model.matrix( ~ 0 + dge.filtered.norm.female$samples$group + dge.filtered.norm.female$samples$RIN)
+colnames(design_female) <- c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM", "RIN")
+# Inspect
+design_female
+```
+
+# Voom
+When the library sizes are quite variable between samples, then the voom approach is theoretically more powerful than limma-trend. 
+The voom method estimates the mean-variance relationship of the log-counts.
+Generates a precision weight for each observation and enters these into the limma empirical Bayes analysis pipeline.
+```{r voom_covariates}
+v <- voomWithQualityWeights(
+  dge.filtered.norm,  # our DGEList object
+  design, # our design matrix
+  plot = TRUE # should mean-variance trend & sample-specific weights be displayed?
+  )
+
+v_male <- voomWithQualityWeights(
+  dge.filtered.norm.male,  # our DGEList object
+  design_male, # our design matrix
+  plot = TRUE # should mean-variance trend & sample-specific weights be displayed?
+  )
+
+v_female <- voomWithQualityWeights(
+  dge.filtered.norm.female,  # our DGEList object
+  design_female, # our design matrix
+  plot = TRUE # should mean-variance trend & sample-specific weights be displayed?
+  )
+```
+
+# Contrast plot
+```{r contrasts}
+# fits linear model for each gene given a series of arrays
+fit_male <- lmFit(v_male, design_male) # voom_cov
+coef.fit_male <- fit_male$coefficients
+
+contrasts_male <- makeContrasts(
+  clean_AM_vs_clean_WT = clean_AM - clean_WT,
+  dirty_AM_vs_dirty_WT = dirty_AM - dirty_WT,
+  dirty_WT_vs_clean_WT = dirty_WT - clean_WT,
+  dirty_AM_vs_clean_AM = dirty_AM - clean_AM,
+  levels = colnames(design_male))
+head(contrasts_male)
+
+# save contrast names
+allComparisons_male <- colnames(contrasts_male)
+allComparisons_male # check
+
+# run contrast analysis
+vfit_male <- contrasts.fit(fit_male, contrasts = contrasts_male)
+
+# Compute differential expression based on the empirical Bayes moderation of the standard errors towards a common value.
+# The logCPM values can then be used in any standard limma pipeline, using the trend=TRUE
+veBayesFit_male <- eBayes(vfit_male, trend = TRUE, robust=TRUE)
+plotSA(veBayesFit_male, main = "Final Model: Mean-variance Trend")
+
+fit_female <- lmFit(v_female, design_female) # voom_cov
+coef.fit_female <- fit_female$coefficients
+
+contrasts_female <- makeContrasts(
+  clean_AM_vs_clean_WT = clean_AM - clean_WT,
+  dirty_AM_vs_dirty_WT = dirty_AM - dirty_WT,
+  dirty_WT_vs_clean_WT = dirty_WT - clean_WT,
+  dirty_AM_vs_clean_AM = dirty_AM - clean_AM,
+  levels = colnames(design_female))
+head(contrasts_female)
+
+# save contrast names
+allComparisons_female <- colnames(contrasts_female)
+allComparisons_female # check
+
+# run contrast analysis
+vfit_female <- contrasts.fit(fit_female, contrasts = contrasts_female)
+
+# Compute differential expression based on the empirical Bayes moderation of the standard errors towards a common value.
+# The logCPM values can then be used in any standard limma pipeline, using the trend=TRUE
+veBayesFit_female <- eBayes(vfit_female, trend = TRUE, robust=TRUE)
+plotSA(veBayesFit_female, main = "Final Model: Mean-variance Trend")
+```
+
+# DEGs summary
+```{r DGE_summary}
+qval <- 0.05
+lfc.cutoff <- 0
+
+sumTable_male <- 
+  summary(decideTests(
+    veBayesFit_male,  # object
+    adjust.method = "BH", # by default the method = "separate"
+    p.value = qval,
+    lfc = lfc.cutoff  # numeric, minimum absolute log2-fold change required
+  ))
+
+print(paste0("male q < ", qval, " & absolute log2-fold change > ", lfc.cutoff))
+sumTable_male
+
+sumTable_female <- 
+  summary(decideTests(
+    veBayesFit_female,  # object
+    adjust.method = "BH", # by default the method = "separate"
+    p.value = qval,
+    lfc = lfc.cutoff  # numeric, minimum absolute log2-fold change required
+  ))
+
+print(paste0("female q < ", qval, " & absolute log2-fold change > ", lfc.cutoff))
+sumTable_female
+
+genes_relevant <- dge.filtered.norm$genes
+```
+
+# DEG heatmap 
+```{r DEG_heatmap}
+sumTable_male <- as.data.frame(sumTable_male)
+colnames(sumTable_male) <- c("direction", "comparison", "count")
+sumTable_male <- sumTable_male[!sumTable_male$direction == "NotSig",]
+sumTable_male <- sumTable_male |> 
+  pivot_wider(names_from = comparison, values_from = count)
+row_names_to_keep <- sumTable_male$direction
+sumTable_male <- sumTable_male[, -which(names(sumTable_male) == "direction")]
+sumTable_male <- t(sumTable_male)
+colnames(sumTable_male) <- row_names_to_keep
+df <- as.data.frame(sumTable_male)
+
+pdf(paste0("results_", projectID, "/sex_stratified/DEGs/DEGs_heatmap_male.pdf"), height = 6, width = 6)
+pheatmap::pheatmap(df,
+                   main = paste0("q < ", qval, " & |log2FC| > ", lfc.cutoff),
+                   treeheight_row = 0,
+                   treeheight_col = 0,
+                   color = rev(natparks.pals("WindCave")),
+                   cluster_rows = FALSE,
+                   display_numbers = round(df, digits = 0),
+                   fontsize_number = 12,
+                   number_color = ifelse(df > 400, "white", "black"),
+                   angle_col = "0",
+                   breaks = c(seq(0, 500, length.out = length(rev(natparks.pals("WindCave"))))))
+dev.off()
+
+
+sumTable_female <- as.data.frame(sumTable_female)
+colnames(sumTable_female) <- c("direction", "comparison", "count")
+sumTable_female <- sumTable_female[!sumTable_female$direction == "NotSig",]
+sumTable_female <- sumTable_female |> 
+  pivot_wider(names_from = comparison, values_from = count)
+row_names_to_keep <- sumTable_female$direction
+sumTable_female <- sumTable_female[, -which(names(sumTable_female) == "direction")]
+sumTable_female <- t(sumTable_female)
+colnames(sumTable_female) <- row_names_to_keep
+df <- as.data.frame(sumTable_female)
+
+pdf(paste0("results_", projectID, "/sex_stratified/DEGs/DEGs_heatmap_female.pdf"), height = 6, width = 6)
+pheatmap::pheatmap(df,
+                   main = paste0("q < ", qval, " & |log2FC| > ", lfc.cutoff),
+                   treeheight_row = 0,
+                   treeheight_col = 0,
+                   color = rev(natparks.pals("WindCave")),
+                   cluster_rows = FALSE,
+                   display_numbers = round(df, digits = 0),
+                   fontsize_number = 12,
+                   number_color = ifelse(df > 400, "white", "black"),
+                   angle_col = "0",
+                   breaks = c(seq(0, 500, length.out = length(rev(natparks.pals("WindCave"))))))
+dev.off()
+```
+
+
+# Output DEG tables
+```{r output_DEG_tables}
+coef <- 1
+
+for (i in allComparisons) {
+  vTopTableAll <- topTable(
+    veBayesFit, 
+    coef = coef,  
+    n = Inf, 
+    p.value = 1,
+    lfc = 0, 
+    sort.by = "P", 
+    genelist = genes_relevant, 
+    confint = TRUE # column of confidence interval 
+    )
+    saveRDS(vTopTableAll, file = 
+            paste0("rObjects/gene_tables/", i,"_gene_table.rds"))
+  path <- paste0("results_", projectID, "/both_sexes/DEGs/", i, "_q1.00.txt", sep = "") 
+  write.table(vTopTableAll, path, sep = "\t", row.names = FALSE, quote = FALSE)
+  
+  # p < 0.05, log2fc > 1
+  vTopTableSig <-
+    topTable( 
+      veBayesFit,  
+      coef = coef,  
+      n = Inf, 
+      p.value = qval,
+      lfc = lfc.cutoff,
+      genelist = genes_relevant, 
+      confint = TRUE)
+  path <- paste0("results_", projectID, "/both_sexes/DEGs/", i, "_q", qval, "_lfc", lfc.cutoff,".txt", sep = "") 
+  write.table(vTopTableSig, path, sep = "\t", row.names = FALSE, quote = FALSE)
+  # increment 
+  coef <- coef + 1
+}
+remove(coef, vTopTableAll, vTopTableSig)
+```

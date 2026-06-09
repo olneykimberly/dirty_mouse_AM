@@ -11,13 +11,16 @@ library(reshape2)
 library(edgeR)  
 library(limma)  
 library(tidyverse)
-library(GenomicFeatures)
+#library(GenomicFeatures)
 library(data.table)
-library(philentropy)
+#library(philentropy)
 library(gplots)
 library(variancePartition)
 library(NatParksPalettes) # colors
 library(cowplot)
+library(stats)
+library(reshape2)
+library(pheatmap)
 
 #----------------- Define variables
 typeOfCount <- c("ReadsPerGene.out.tab") 
