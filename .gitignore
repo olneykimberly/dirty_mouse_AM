@@ -8,3 +8,9 @@ scripts/slurm*
 /starAligned/*
 /trimmedQC/*
 /trimmedReads/*
+rawQC/*
+results_AM/*
+rObjects/*
+scripts/shiny/rsconnect/*
+dirty_mouse_AM.Rproj
+.DS_Store

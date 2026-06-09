@@ -1,7 +1,7 @@
 ---
 title: "Differential expression - APP/MAPT versus WT dirty mice mRNA"
 author: "Kimberly Olney, PhD"
-date: "October 2025"
+date: "January 2026"
 output:
   pdf_document: default
 params:
@@ -348,28 +348,33 @@ rm(log2cpm.tech, log2cpm.norm, log2cpm.filtered, den, colors, nsamples, path, i)
 info <- as.data.frame(dge.filtered.norm$samples)
 
 info <- extract_gene_cpm("Uty", cpm_gene_names, info)
-info <- extract_gene_cpm("Omp", cpm_gene_names, info)
+info <- extract_gene_cpm("Lcn2", cpm_gene_names, info)
 info <- extract_gene_cpm("Hbb-bs", cpm_gene_names, info)
 info <- extract_gene_cpm("Ttr", cpm_gene_names, info)
 
 # Gather the expression for the four genes into a long format for easy plotting
 plot_data <- info %>%
   # Use backticks around Hbb-bs
-  dplyr::select(sample, group, Uty, Omp, `Hbb-bs`, Ttr) %>%
+  dplyr::select(sample, group, Uty, Lcn2, `Hbb-bs`, Ttr) %>%
   # Using pivot_longer (the modern replacement for gather)
   tidyr::pivot_longer(
-    cols = c(Uty, Omp, `Hbb-bs`, Ttr), 
+    cols = c(Uty, Lcn2, `Hbb-bs`, Ttr), 
     names_to = "Gene", 
     values_to = "Expression"
   ) %>%
   dplyr::mutate(
     group = factor(group, levels = c("clean_WT", "clean_AM", "dirty_WT", "dirty_AM")),
-    Gene = factor(Gene, levels = c("Uty", "Omp", "Hbb-bs", "Ttr"))
+    Gene = factor(Gene, levels = c("Uty", "Lcn2", "Hbb-bs", "Ttr"))
   )
 
 # Create a list of plots, one for each gene
 gene_plots <- list()
-genes_to_plot <- c("Uty", "Omp", "Hbb-bs", "Ttr") # Only plotting the newly requested genes
+genes_to_plot <- c("Uty", "Lcn2", "Hbb-bs", "Ttr") # Only plotting the newly requested genes
+
+condition_colors <- c(clean_WT = "#56B4E9", 
+clean_AM = "#009E73", 
+dirty_WT = "#F0E442", 
+dirty_AM = "#E69F00")
 
 for (g in genes_to_plot) {
   p <- plot_data %>%
@@ -381,7 +386,8 @@ for (g in genes_to_plot) {
       x = "Experimental Group",
       y = "CPM"
     ) +
-    theme_minimal() +
+      scale_fill_manual(values = condition_colors) +
+      theme_minimal() +
     theme(
       legend.position = "none",
       plot.title = element_text(hjust = 0.5, face = "bold"),
@@ -398,7 +404,7 @@ for (g in genes_to_plot) {
 # Combine the plots side-by-side (using plot_grid for simplicity)
 combined_plot <- cowplot::plot_grid(
   gene_plots[["Uty"]],
-  gene_plots[["Omp"]],
+  gene_plots[["Lcn2"]],
   gene_plots[["Hbb-bs"]],
   gene_plots[["Ttr"]],
   ncol = 2 # Display in a single row
@@ -441,7 +447,7 @@ rm(voom_with_weights, formula)
 variancePartition quantifies and interprets multiple sources of biological and technical variation in gene expression experiments. The package a linear mixed model to quantify variation in gene expression attributable to individual, tissue, time point, or technical variables.
 
 ```{r varpart}
-form_varPart <- ~ (1|group) + (1|sex) + (1 | collection_date) + RIN 
+form_varPart <- ~ (1|C_or_D) + (1|genotype) + (1|sex) + (1 | collection_date) + RIN 
 # fit model and extract variance percents
 rownames(info) <- info$sample
 sample_order <- colnames(voomCounts)
@@ -601,7 +607,7 @@ dev.off()
 ```{r DGE_check, eval=FALSE}
 DEG_check <- topTable(
   veBayesFit, 
-  coef = "clean_AM_vs_clean_WT",  
+  coef = "dirty_AM_vs_dirty_WT",  
   n = Inf, 
   p.value = 1,
   lfc = 0, 
@@ -882,9 +888,10 @@ for (i in allComparisons) {
 
 allComparisons
 list_of_datasets <- list(
-  "Bedding_vs_Clean" = Bedding_vs_Clean,
-  "CH_vs_Clean" = CH_vs_Clean,
-  "CH_vs_Bedding" = CH_vs_Bedding
+  "clean_AM_vs_clean_WT" = clean_AM_vs_clean_WT,
+  "dirty_AM_vs_dirty_WT" = dirty_AM_vs_dirty_WT,
+  "dirty_WT_vs_clean_WT" = dirty_WT_vs_clean_WT,
+  "dirty_AM_vs_clean_AM" = dirty_AM_vs_clean_AM
 )
 write.xlsx(list_of_datasets, file = paste0("results_", projectID, "/both_sexes/DEGs/DEGs.q1.00.xlsx"))
 ```
@@ -929,43 +936,44 @@ for (i in allComparisons) {
 # DEGs by FDRq <= 0.05
 ```{r}
 # sex as a covariate
-CH_vs_Clean_up <- subset(CH_vs_Clean, logFC > 0.0 & adj.P.Val <= 0.05)
-CH_vs_Clean_down <- subset(CH_vs_Clean, logFC < -0.0 & adj.P.Val <= 0.05)
-CH_vs_Bedding_up <- subset(CH_vs_Bedding, logFC > 0.0 & adj.P.Val <= 0.05)
-CH_vs_Bedding_down <- subset(CH_vs_Bedding, logFC < -0.0 & adj.P.Val <= 0.05)
+clean_AM_vs_clean_WT_up <- subset(clean_AM_vs_clean_WT, logFC > 0.0 & adj.P.Val <= 0.05)
+clean_AM_vs_clean_WT_down <- subset(clean_AM_vs_clean_WT, logFC < -0.0 & adj.P.Val <= 0.05)
+dirty_AM_vs_dirty_WT_up <- subset(dirty_AM_vs_dirty_WT, logFC > 0.0 & adj.P.Val <= 0.05)
+dirty_AM_vs_dirty_WT_down <- subset(dirty_AM_vs_dirty_WT, logFC < -0.0 & adj.P.Val <= 0.05)
 ```
 
 # Upset of DEGs
 ```{r}
-list_input <- list("CH vs clean down-regulated" = CH_vs_Clean_down$gene_name,
-                   "CH vs clean up-regulated" = CH_vs_Clean_up$gene_name,
-                   "CH vs bedding down-regulated" = CH_vs_Bedding_down$gene_name,
-                   "CH vs bedding up-regulated" = CH_vs_Bedding_up$gene_name)
+library(ComplexUpset)
+list_input <- list("clean AM vs WT down-regulated" = clean_AM_vs_clean_WT_down$gene_name,
+                   "clean AM vs WT up-regulated" = clean_AM_vs_clean_WT_up$gene_name,
+                   "dirty AM vs WT down-regulated" = dirty_AM_vs_dirty_WT_down$gene_name,
+                   "dirty AM vs WT up-regulated" = dirty_AM_vs_dirty_WT_up$gene_name)
 data <- fromList(list_input)
 
 upset_gene <- upset(data, set_sizes = FALSE,
-      c('CH vs clean down-regulated',
-        'CH vs bedding down-regulated',
-        'CH vs clean up-regulated',
-        'CH vs bedding up-regulated'),
+      c('clean AM vs WT down-regulated',
+        'dirty AM vs WT down-regulated',
+        'clean AM vs WT up-regulated',
+        'dirty AM vs WT up-regulated'),
       themes=upset_modify_themes(
         list('intersections_matrix'=theme(text=element_text(size=10),
               plot.margin = margin(0, 0, 0, 0, "cm")),
           'overall_sizes' = theme(axis.text.x = element_text(size =10), 
               plot.margin = margin(0, 0, 0, 0, "cm")))),
   queries=list(
-    upset_query(set='CH vs clean down-regulated', fill='blue'),
-    upset_query(set='CH vs bedding down-regulated', fill='blue'),
-    upset_query(set='CH vs clean up-regulated', fill='red'),
-    upset_query(set='CH vs bedding up-regulated', fill='red')
+    upset_query(set='clean AM vs WT down-regulated', fill='blue'),
+    upset_query(set='dirty AM vs WT down-regulated', fill='blue'),
+    upset_query(set='clean AM vs WT up-regulated', fill='red'),
+    upset_query(set='dirty AM vs WT up-regulated', fill='red')
   ),
   intersections = list(
-                       c('CH vs clean down-regulated', 'CH vs bedding down-regulated'), 
-                       'CH vs clean down-regulated',
-                       'CH vs bedding down-regulated', 
-                       c('CH vs clean up-regulated', 'CH vs bedding up-regulated'), 
-                       'CH vs clean up-regulated',
-                       'CH vs bedding up-regulated'
+                       c('clean AM vs WT down-regulated', 'dirty AM vs WT down-regulated'), 
+                       'clean AM vs WT down-regulated',
+                       'dirty AM vs WT down-regulated', 
+                       c('clean AM vs WT up-regulated', 'dirty AM vs WT up-regulated'), 
+                       'clean AM vs WT up-regulated',
+                       'dirty AM vs WT up-regulated'
   ),
   base_annotations=list(
     'Intersection size'=(
